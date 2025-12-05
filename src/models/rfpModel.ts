@@ -6,18 +6,18 @@ const RFPSchema=new Schema({
     description: { type: String, required: true },
     
     // Structured data extracted by AI
-    structuredData:{
-        items: [{
-            name: String,
-            quantity: Number,
-            specifications: String
-          }],
-      
-          budget: { type: Number, required: true },
-          deliveryDeadline: { type: Date, required: true },
-          paymentTerms: String,
-          warrantyRequirement: String,
-    },
+
+    items: [{
+        name: String,
+        quantity: Number,
+        specifications: String
+      }],
+  
+      budget: { type: Number, required: true },
+      deliveryDeadline: { type: Date, required: true },
+      paymentTerms: String,
+      warrantyRequirement: String,
+    
     
     // Vendors this RFP was sent to
     selectedVendors: [{ 
