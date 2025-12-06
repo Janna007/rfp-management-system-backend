@@ -108,6 +108,7 @@ export class AIService{
          "paymentTerms": "Their payment terms",
          "warranty": "Warranty offered",
          "additionalTerms": String,
+        "completeness": number (0-100, how well they addressed the RFP)
        }
        `;
  
@@ -136,7 +137,8 @@ export class AIService{
               deliveryTime: { type: "string", format: "date-time" },
               paymentTerms: { type: "string" },
               warranty: { type: "string" },
-              additionalTerms: { type: "string" }
+              additionalTerms: { type: "string" },
+              completeness:{type:"number"}
             },
             
           }
@@ -226,6 +228,123 @@ export class AIService{
           throw error
        }
     }
+
+    async compareProposals(rfp:any,proposals:any){
+  // Format all proposals for AI
+  const proposalsText = proposals.map((p:any, idx:any) => `
+  VENDOR ${idx + 1}: ${p.vendorId.name} (ID: ${p.vendorId._id})
+  - Total Price: $${p.totalPrice}
+  - Delivery: ${p.deliveryTime}
+  - Payment Terms: ${p.paymentTerms}
+  - Warranty: ${p.warranty}
+  - Completeness: ${p.completeness}%
+  - Items: ${JSON.stringify(p.items)}
+        `).join('\n---\n');
+
+
+        try {
+
+        
+      const prompt = `
+      You are helping evaluate vendor proposals for an RFP.
+      
+      ORIGINAL REQUIREMENTS:
+      Budget: $${rfp.budget}
+      Items: ${JSON.stringify(rfp.items)}
+      Deadline: ${rfp.deliveryDeadline}
+      
+      VENDOR PROPOSALS:
+      ${proposalsText}
+      
+      Provide a comprehensive analysis:
+      1. Score each vendor (0-100) based on:
+         - Price competitiveness (within budget)
+         - How well they met requirements (completeness score)
+         - Delivery time (faster is better)
+         - Warranty terms (longer is better)
+         - Payment terms (flexibility)
+      
+      2. For each vendor, list:
+         - 3-5 specific pros (strengths)
+         - 2-4 specific cons (weaknesses)
+      
+      3. Recommend the best vendor with detailed reasoning
+      
+      4. Identify any risk factors to consider
+      
+      5. Provide an executive summary
+      
+      Be objective and data-driven in your analysis.
+      `;
+
+          
+      const response =  await ai.models.generateContent({
+        model: "gemini-2.5-flash",
+        contents:prompt,
+        config: {
+         responseMimeType: "application/json",
+         responseSchema: {
+          type: "object",
+          properties: {
+            vendorScores: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  vendorName: { type: "string" },
+                  vendorId: { type: "string" },
+                  score: { type: "number" },
+                  pros: {
+                    type: "array",
+                    items: { type: "string" }
+                  },
+                  cons: {
+                    type: "array",
+                    items: { type: "string" }
+                  }
+                },
+                required: ["vendorName", "vendorId", "score", "pros", "cons"]
+              }
+            },
+            recommendation: {
+              type: "object",
+              properties: {
+                bestVendor: { type: "string" },
+                reasoning: { type: "string" },
+                riskFactors: {
+                  type: "array",
+                  items: { type: "string" }
+                }
+              },
+              required: ["bestVendor", "reasoning", "riskFactors"]
+            },
+            summary: { type: "string" }
+          },
+          required: ["vendorScores", "recommendation", "summary"]
+        }
+       },
+     });
+
+     if(!response.text){
+       const error = createHttpError(500, 'AI parsing error')
+       throw error
+     }
+
+     const parsed = JSON.parse(response.text)
+     return parsed
+          
+        } catch (err) {
+          console.error('AI parsing error:', err);
+        const error = createHttpError(500, 'Failed to generate Result')
+        throw error
+        }
+
+          }
+
+
+        
+    
+          
 }
 
 

@@ -31,7 +31,7 @@ export class RfpService{
             return res    
             } catch (err) {
                 console.log(err)
-                const error = createHttpError(500, 'Error while parsing data')
+                const error = createHttpError(500, 'Error while fetching data')
                 throw error
             }
     }

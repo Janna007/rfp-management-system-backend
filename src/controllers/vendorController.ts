@@ -4,8 +4,10 @@ import { VendorService } from "../services/vendorServices";
 export class VendorController {
   constructor(private vendorService: VendorService) {}
   async createVendor(req: Request, res: Response, next: NextFunction) {
+    // console.log("called")
     try {
       const vendor = await this.vendorService.createVendor(req.body);
+      // console.log(vendor)
 
       res.json({
         success: true,
@@ -21,10 +23,12 @@ export class VendorController {
     try {
       const vendors = await this.vendorService.getVendors(req.query);
 
+
+
       res.json({
+        ...vendors,
         success: true,
         message: "Vendors fetched successfully",
-        data: vendors,
       });
     } catch (error) {
       next(error);

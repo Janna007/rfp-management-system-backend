@@ -82,4 +82,60 @@ export class ProposalController {
     return
    }
   }
+
+  async getAllProposals(req: Request, res: Response, next: NextFunction){
+    try {
+    
+      const proposals=await this.proposalService.getProposals(req.params.id)
+
+      res.json({
+        success: true,
+        message: 'RFP fetcheds successfully',
+        data: proposals
+      });
+      
+    } catch (error) {
+      next(error)
+      return
+    }
+  }
+
+  async compareProposals(req: Request, res: Response, next: NextFunction){
+      try {
+
+        const rfp=await this.rfpService.getRfp(req.params.id)
+
+        const proposals=await this.proposalService.getProposals(req.params.id)
+
+        //compare prposals useing rfp and proposals 
+
+        const comparison = await this.aiService.compareProposals(rfp[0], proposals);
+
+        //store ai score
+
+        for (const vendorScore of comparison.vendorScores) {
+          // Find the matching proposal by vendorId
+          const proposal = proposals.find(p => 
+            p.vendorId._id.toString() === vendorScore.vendorId
+          );
+    
+          if (proposal) {
+            // Update the proposal with AI score and evaluation details
+            await this.proposalService.updateProposal(proposal._id, {
+              aiScore: vendorScore.score,
+              aiSummary: vendorScore.pros,      // Optional: store pros     // Optional: store cons
+              status: 'evaluated'            // Update status
+            });
+          }
+        }
+
+        res.json({ success: true, data:comparison });
+        
+      } catch (error) {
+        next(error)
+        return
+      }
+  }
+
+  
 }

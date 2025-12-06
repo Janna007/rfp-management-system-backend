@@ -18,5 +18,11 @@ router.post("/:id", (req: Request, res: Response, next: NextFunction) =>
     proposalController.checkForProposal(req, res, next)
 );
 
+router.get("/:id", (req: Request, res: Response, next: NextFunction) =>
+    proposalController.getAllProposals(req, res, next)
+);
+
+
+
 
 export default router;
