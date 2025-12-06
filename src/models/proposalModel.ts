@@ -1,49 +1,55 @@
-import mongoose, {Schema } from "mongoose";
+import mongoose, { Schema } from "mongoose";
 
-const PrposalSchema=new Schema({
-    rfpId:{
-      type:mongoose.Schema.Types.ObjectId,
-      ref:"RFP"
+const PrposalSchema = new Schema(
+  {
+    rfpId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "RFP",
     },
-    vendorId:{
-      type:mongoose.Schema.Types.ObjectId,
-      ref:"Vendor"
+    vendorId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Vendor",
     },
-    
+
     rawEmail: {
-        subject: String,
-        bodyText: String,
-        bodyHtml: String,
-      },
-    
-    // Structured data extracted by AI
-    structuredData:{
-        items: [{
-            name: String,
-            unitPrice: Number,
-            quantity: Number,
-            totalPrice: Number,
-            specifications: String
-          }],
-
-          totalPrice: Number,
-          deliveryTime: String,
-          paymentTerms: String,
-          warranty: String,
-          additionalTerms: String,
+        type:String
     },
 
-     // AI-generated evaluation
-  aiScore: Number, // 0-100
-  aiSummary: String,
-  completeness: Number, // How well they answered the RFP
-
-  status: { 
-    type: String, 
-    enum: ['received', 'parsed', 'evaluated'],
-    default: 'received'
-  }
+    // Structured data extracted by AI
     
-},{timestamps:true})
+      items: [
+        {
+          name: String,
+          unitPrice: Number,
+          quantity: Number,
+          totalPrice: Number,
+          specifications: String,
+        },
+      ],
 
-export const Proposal=mongoose.model("Proposal",PrposalSchema)
+      totalPrice: Number,
+      deliveryTime: String,
+      paymentTerms: String,
+      warranty: String,
+      additionalTerms: String,
+  
+
+      //to avoid duplication
+      messageId:{
+        type:String
+      },
+    // AI-generated evaluation
+    aiScore: Number, // 0-100
+    aiSummary: String,
+    completeness: Number, // How well they answered the RFP
+
+    status: {
+      type: String,
+      enum: ["received", "parsed", "evaluated"],
+      default: "received",
+    },
+  },
+  { timestamps: true }
+);
+
+export const Proposal = mongoose.model("Proposal", PrposalSchema);

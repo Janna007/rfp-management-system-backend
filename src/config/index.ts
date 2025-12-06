@@ -9,12 +9,16 @@ config({
 const {
     PORT,
     MONGO_DB_URL,
-    GEMINI_API_KEY
+    GEMINI_API_KEY,
+    EMAIL_USER,
+    EMAIL_APP_PASSWORD
     
 } = process.env
 
 export const Config = {
     PORT,
     MONGO_DB_URL,
-    GEMINI_API_KEY
+    GEMINI_API_KEY,
+    EMAIL_USER,
+    EMAIL_APP_PASSWORD
 }

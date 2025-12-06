@@ -81,6 +81,151 @@ export class AIService{
         }
     }
 
+    async parseVendorProposal(email:string,rfp:any){
+     try {
+       const prompt = `
+       You are analyzing a vendor's response to an RFP.
+       
+       ORIGINAL RFP REQUIREMENTS:
+       ${JSON.stringify(rfp[0])}
+       
+       VENDOR'S EMAIL RESPONSE:
+       "${email}"
+       
+       Extract the following information and return as JSON:
+       {
+         "items": [
+           {
+             "name": "Item name",
+             "unitPrice": number,
+             "quantity": number,
+             "totalPrice": number,
+             "specifications": "What they're offering"
+           }
+         ],
+         "totalPrice": number,
+         "deliveryTime": "How long until delivery",
+         "paymentTerms": "Their payment terms",
+         "warranty": "Warranty offered",
+         "additionalTerms": String,
+       }
+       `;
+ 
+       const response =  await ai.models.generateContent({
+         model: "gemini-2.5-flash",
+         contents:prompt,
+         config: {
+          responseMimeType: "application/json",
+          responseJsonSchema: {
+            type:"object",
+            properties:{
+              items:{
+                type:"array",
+                items:{
+                  type:"object",
+                  properties:{
+                    name: { type: "string" },
+                    unitPrice: { type: "number" },
+                    quantity: { type: "number" },
+                    totalPrice: { type: "number" },
+                    specifications: { type: "string" }
+                   }
+                }
+              },
+              totalPrice: { type: "number" },
+              deliveryTime: { type: "string", format: "date-time" },
+              paymentTerms: { type: "string" },
+              warranty: { type: "string" },
+              additionalTerms: { type: "string" }
+            },
+            
+          }
+        },
+      });
+
+      if(!response.text){
+        const error = createHttpError(500, 'AI parsing error')
+        throw error
+      }
+ 
+      const parsed = JSON.parse(response.text)
+      return parsed
+      
+     } catch (err) {
+      console.error('AI parsing error:', err);
+      const error = createHttpError(500, 'AI parsing error')
+      throw error
+     }
+    }
+
+    async generateRfpEmail(rfp:any,vendor:any){
+      try {
+        const prompt = `
+        You are an expert B2B procurement communication writer.
+        
+        Write a **professional, concise, and vendor-friendly RFP invitation email**.
+        
+        Use ONLY the information from the RFP object and vendor name below.
+        
+        ------------------------
+        RFP DATA (JSON):
+        ${JSON.stringify(rfp[0],null, 2)}
+        
+        VENDOR NAME:
+        ${vendor}
+
+
+        SENDER NAME:
+        "Janna Kondeth"
+
+        SENDER COMPANY:
+        "Stoilett PVT LTD"
+
+        SUBMISSION DEADLINE
+        "2 Days from the date of request"
+        ------------------------
+
+        
+        ### Email Requirements
+        - Write in a formal but friendly business tone.
+        - Start with a clear greeting using the vendor name.
+        - Write a short introduction describing why the vendor is being contacted.
+        - Summarize the RFP project in 2–3 sentences using ONLY data from the RFP object.
+        - List the requirements clearly (convert JSON fields into bullet points).
+        - Clearly mention budget, delivery timeline, and any other constraints present in the RFP data.
+        - Add a “What we need in your proposal” section (bullet points).
+        - Add clear submission instructions (fallback text if not provided in RFP).
+        - End with a professional closing.
+        - **Do NOT create any extra fictional details**.
+        - **Do NOT include a subject line.**
+        - **Return only the email body text.**
+        
+        ### Format:
+        - Use markdown for headings (**bold**) and bullet lists.
+        - Ensure the output looks like a polished business email.
+        
+        Generate the final email now.
+        `;
+         const response =  await ai.models.generateContent({
+            model: "gemini-2.5-flash",
+            contents:prompt,
+         });
+
+         if(!response.text){
+           const error = createHttpError(500, 'Email generating error')
+           throw error
+         }
+
+        
+
+    
+        return response.text
+       } catch (err) {
+          console.error('AI parsing error:', err);
+          const error = createHttpError(500, 'Failed to generate RFP email')
+          throw error
+       }
+    }
 }
 
 

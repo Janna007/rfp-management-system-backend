@@ -8,6 +8,7 @@ import { HttpError } from "http-errors";
  */
 import rfpRouter from "./routers/rfp";
 import vendorRouter from "./routers/vendor";
+import proposalRouter from "./routers/proposal"
 
 const app = express();
 
@@ -16,6 +17,7 @@ app.use(express.json());
 
 app.use("/api/rfp", rfpRouter);
 app.use("/api/vendor", vendorRouter);
+app.use("/api/proposal",proposalRouter)
 
 app.use((err: HttpError, req: Request, res: Response, next: NextFunction) => {
   logger.error(err.message);
