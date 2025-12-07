@@ -2,6 +2,7 @@ import express, { NextFunction, Request, Response } from "express";
 import cors from "cors";
 import logger from "./config/logger";
 import { HttpError } from "http-errors";
+import morgan from "morgan";
 
 /**
  * Routes
@@ -14,6 +15,7 @@ const app = express();
 
 app.use(cors())
 app.use(express.json());
+app.use(morgan("dev"));
 
 app.use("/api/rfp", rfpRouter);
 app.use("/api/vendor", vendorRouter);

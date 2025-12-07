@@ -12,34 +12,36 @@ const PrposalSchema = new Schema(
     },
 
     rawEmail: {
-        type:String
+      type: String,
     },
 
     // Structured data extracted by AI
-    
-      items: [
-        {
-          name: String,
-          unitPrice: Number,
-          quantity: Number,
-          totalPrice: Number,
-          specifications: String,
-        },
-      ],
 
-      totalPrice: Number,
-      deliveryTime: String,
-      paymentTerms: String,
-      warranty: String,
-      additionalTerms: String,
-  
-
-      //to avoid duplication
-      messageId:{
-        type:String
+    items: [
+      {
+        name: String,
+        unitPrice: Number,
+        quantity: Number,
+        totalPrice: Number,
+        specifications: String,
       },
+    ],
+
+    totalPrice: Number,
+    deliveryTime: String,
+    paymentTerms: String,
+    warranty: String,
+    additionalTerms: String,
+
+    //to avoid duplication
+    messageId: {
+      type: String,
+    },
     // AI-generated evaluation
+    isBest: { type: Boolean, default: false },
     aiScore: Number, // 0-100
+    aiPros:String,
+    aiCons:String,
     aiSummary: String,
     completeness: Number, // How well they answered the RFP
 

@@ -223,11 +223,14 @@ export class AIService {
   }
 
   async compareProposals(rfp: any, proposals: any) {
+    console.log(proposals);
+
     // Format all proposals for AI
     const proposalsText = proposals
       .map(
         (p: any, idx: any) => `
-  VENDOR ${idx + 1}: ${p.vendorId.name} (ID: ${p.vendorId._id})
+  VENDOR ${idx + 1}: ${p.vendor[0].name} (ID: ${p.vendor[0]._id})
+  - ProposalId:$${p._id}
   - Total Price: $${p.totalPrice}
   - Delivery: ${p.deliveryTime}
   - Payment Terms: ${p.paymentTerms}
@@ -238,11 +241,14 @@ export class AIService {
       )
       .join("\n---\n");
 
+    console.log({ proposalsText });
+
     try {
       const prompt = `
           You are helping evaluate vendor proposals for an RFP.
           
           ORIGINAL REQUIREMENTS:
+          Title:$${rfp.title}
           Budget: $${rfp.budget}
           Items: ${JSON.stringify(rfp.items)}
           Deadline: ${rfp.deliveryDeadline}
@@ -272,9 +278,14 @@ export class AIService {
           that appears after each vendor's name in the proposals above. Do NOT modify or generate new IDs.
           For example, if the proposal shows "VENDOR 1: Dell (ID: 674ab123c456789def012345)", 
           you must return "vendorId": "674ab123c456789def012345" in your response.
-          
+
+          In the recommendation section, you MUST include the EXACT ProposalId (the MongoDB ObjectId) 
+          as proposalId Do NOT modify or generate new IDs.
+           
           Be objective and data-driven in your analysis.
           `;
+
+      console.log({ prompt });
 
       const response = await ai.models.generateContent({
         model: "gemini-2.5-flash",
@@ -291,23 +302,26 @@ export class AIService {
                   properties: {
                     vendorName: { type: "string" },
                     vendorId: { type: "string" },
+                    proposalId: { type: "string" },
                     score: { type: "number" },
                     pros: {
                       type: "string",
-                      
-                      
                     },
                     cons: {
                       type: "string",
-                      
                     },
+                    summary:{
+                      type:"string"
+                    }
                   },
-                  required: ["vendorName", "vendorId", "score", "pros", "cons"],
+                  required: ["vendorName", "vendorId", "score", "pros", "cons","summary"],
                 },
               },
               recommendation: {
                 type: "object",
                 properties: {
+                  rfpTitle: { type: "string" },
+                  proposalId: { type: "string" },
                   bestVendor: { type: "string" },
                   reasoning: { type: "string" },
                   riskFactors: {
@@ -315,7 +329,13 @@ export class AIService {
                     items: { type: "string" },
                   },
                 },
-                required: ["bestVendor", "reasoning", "riskFactors"],
+                required: [
+                  "rfpTitle",
+                  "proposalId",
+                  "bestVendor",
+                  "reasoning",
+                  "riskFactors",
+                ],
               },
               summary: { type: "string" },
             },

@@ -102,7 +102,23 @@ export class ProposalController {
 
   async getAllProposals(req: Request, res: Response, next: NextFunction) {
     try {
+      console.log("Getting all proposals by params ID");
       const proposals = await this.proposalService.getProposals(req.params.id);
+
+      res.json({
+        success: true,
+        message: "proposals fetched successfully",
+        data: proposals,
+      });
+    } catch (error) {
+      next(error);
+      return;
+    }
+  }
+
+  async getProposal(req: Request, res: Response, next: NextFunction) {
+    try {
+      const proposals = await this.proposalService.getAll();
 
       res.json({
         success: true,
@@ -129,21 +145,32 @@ export class ProposalController {
 
       for (const vendorScore of comparison.vendorScores) {
         // Find the matching proposal by vendorId
-        const proposal = proposals.find(
-          (p) => p.vendorId._id.toString() === vendorScore.vendorId
-        );
 
-        if (proposal) {
+        if (vendorScore?.proposalId) {
           // Update the proposal with AI score and evaluation details
-          await this.proposalService.updateProposal(proposal._id, {
+          await this.proposalService.updateProposal(vendorScore?.proposalId, {
             aiScore: vendorScore.score,
-            aiSummary: vendorScore.pros, // Optional: store pros     // Optional: store cons
+            aiPros: vendorScore.pros,
+            aiCons: vendorScore.pros,
+            aiSummary: vendorScore.summary, // Optional: store pros     // Optional: store cons
             status: "evaluated", // Update status
+            isBest:
+              comparison.recommendation?.proposalId === vendorScore?.proposalId,
           });
         }
       }
 
-      res.json({ success: true, data: comparison });
+      const proposal = await this.proposalService.getProposal(
+        comparison.recommendation?.proposalId
+      );
+
+      const response = {
+        proposal: proposal,
+        ...comparison.recommendation,
+        summary: comparison.summary,
+      };
+
+      res.json({ success: true, data: response });
     } catch (error) {
       next(error);
       return;
