@@ -1,5 +1,6 @@
 import createHttpError from "http-errors";
 import { Proposal } from "../models/proposalModel";
+import mongoose from "mongoose";
 
 export class ProposalService {
     async createProposal(rfpId:string,vendorId:string,rawEmail:string,parsedData:any,messageId:string){
@@ -25,7 +26,7 @@ export class ProposalService {
         const res= await Proposal.aggregate([
             {
                $match:{
-                  rfpId: rfpID
+                  rfpId:new mongoose.Types.ObjectId(rfpID),
                }
             },
             {
@@ -35,7 +36,15 @@ export class ProposalService {
                     foreignField:"_id",
                     as:"vendor"
                 }
-            }
+            },
+            {
+              $lookup:{
+                  from:'rfps',
+                  localField:'rfpId',
+                  foreignField:"_id",
+                  as:"rfp"
+              }
+          }
         ])
         return res    
         } catch (err) {

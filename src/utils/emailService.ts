@@ -41,13 +41,13 @@ export class EmailService {
       const mailOptions = {
         from: Config.EMAIL_USER,
         to: vendorEmail,
-        subject: `RFP: ${rfp[0].title} - Reference #${rfp[0]._id}`,
+        subject: `RFP: ${rfp.title} - Reference #${rfp._id}`,
         text: emailBody,
         html: `
                   <div style="font-family: Arial, sans-serif;">
                     ${emailBody.replace(/\n/g, "<br>")}
                     <hr>
-                    <p><strong>Reference ID:</strong> ${rfp[0]._id}</p>
+                    <p><strong>Reference ID:</strong> ${rfp._id}</p>
                     <p><em>Please include this reference ID in your response.</em></p>
                   </div>
                 `,
@@ -107,6 +107,7 @@ export class EmailService {
               });
             });
 
+           
             fetcher.once("end", () => {
               imap.end();
               resolve(emails);

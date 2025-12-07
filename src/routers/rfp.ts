@@ -17,6 +17,12 @@ router.post(
         rfpController.parseRfpInput(req, res, next),
 )
 
+router.post(
+    '/create',
+    (req: Request, res: Response, next: NextFunction) =>
+        rfpController.createRpf(req, res, next),
+)
+
 router.get(
     '/',
     (req: Request, res: Response, next: NextFunction) =>
@@ -25,7 +31,7 @@ router.get(
 router.get(
     '/:id',
     (req: Request, res: Response, next: NextFunction) =>
-        rfpController.getAllRfps(req, res, next),
+        rfpController.getRfp(req, res, next),
 )
 
 router.post(

@@ -23,6 +23,12 @@ router.get("/:id", (req: Request, res: Response, next: NextFunction) =>
 );
 
 
+router.post("/compare/:id", (req: Request, res: Response, next: NextFunction) =>
+    proposalController.compareProposals(req, res, next)
+);
+
+
+
 
 
 export default router;

@@ -26,6 +26,7 @@ export class VendorService {
 
     const pipeline: PipelineStage[] = [
       { $match: matchObj },
+      { $sort: { createdAt: -1 } },
       {
         $facet: {
           data: [{ $skip: skip }, { $limit: Number(limit) }],
