@@ -314,7 +314,7 @@ export class AIService {
                       type:"string"
                     }
                   },
-                  required: ["vendorName", "vendorId", "score", "pros", "cons","summary"],
+                  required: ["vendorName", "vendorId", "score", "pros", "cons","summary","proposalId"],
                 },
               },
               recommendation: {
@@ -343,6 +343,8 @@ export class AIService {
           },
         },
       });
+
+      
 
       if (!response.text) {
         const error = createHttpError(500, "AI parsing error");

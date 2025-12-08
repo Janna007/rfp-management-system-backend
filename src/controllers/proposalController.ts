@@ -143,6 +143,8 @@ export class ProposalController {
 
       //store ai score
 
+      console.log("comparison",comparison)
+
       for (const vendorScore of comparison.vendorScores) {
         // Find the matching proposal by vendorId
 

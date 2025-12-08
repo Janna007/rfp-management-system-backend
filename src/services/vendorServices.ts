@@ -5,11 +5,11 @@ import { PipelineStage } from "mongoose";
 export class VendorService {
   async createVendor(vendor: any) {
     try {
-      const isExist=await Vendor.find({email:vendor.email})
-      if(isExist){
-        const error = createHttpError(400, "Vendor With this email already exist");
-       throw error;
-      }
+      // const isExist=await Vendor.findOne({email:vendor.email})
+      // if(isExist){
+      //   const error = createHttpError(400, "Vendor With this email already exist");
+      //  throw error;
+      // }
       return await Vendor.create(vendor);
     } catch (err) {
       console.log(err);
