@@ -29,7 +29,8 @@ export class ProposalController {
 
       //check inbox for new  emails with this id as refernce id
 
-      const emailResponses = await this.emailService.checkForResponses(rfp._id);
+      const emailResponses = await this.emailService.checkForResponses(rfpId);
+      console.log("emailResponse", emailResponses);
 
       if (emailResponses.length === 0) {
         return res.json({
@@ -37,7 +38,6 @@ export class ProposalController {
           message: "No new proposals found!!",
         });
       }
-      console.log("emailResponse", emailResponses);
 
       //adde that to proposal db
 

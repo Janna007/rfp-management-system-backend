@@ -65,62 +65,59 @@ export class EmailService {
 
   async checkForResponses(rfpId: string): Promise<any[]> {
     const imap = new Imap(this.imapConfig);
-
+  
     return new Promise((resolve, reject) => {
+  
       imap.once("ready", () => {
-        imap.openBox("INBOX", false, (err) => {
+        imap.openBox("INBOX", true, (err) => { // OPEN IN READ-ONLY MODE
           if (err) return reject(err);
-
-          const searchCriteria: any[] = [
-            "UNSEEN",
-            ["SUBJECT", rfpId.toString()],
+  
+          const searchCriteria = [
+            ["HEADER", "SUBJECT", rfpId.toString()] // more reliable than SUBJECT
           ];
-
+  
           imap.search(searchCriteria, (err, results) => {
             if (err) return reject(err);
-
-            console.log("search results",results)
-
-            // If no matching emails found
+  
             if (!results || results.length === 0) {
               imap.end();
               return resolve([]);
             }
-
+  
             const emails: any[] = [];
-
+            let pending = results.length;
+  
             const fetcher = imap.fetch(results, { bodies: "" });
-
+  
             fetcher.on("message", (msg) => {
               msg.on("body", (stream) => {
                 simpleParser(stream as any)
-                  .then((parsed: ParsedMail) => {
+                  .then((parsed) => {
                     emails.push({
-                      messageId: parsed.messageId,  
+                      messageId: parsed.messageId,
                       from: parsed.from?.text || "",
                       subject: parsed.subject || "",
                       text: parsed.text || "",
                       date: parsed.date || new Date(),
                     });
                   })
-                  .catch((error) => console.error("Parse error:", error));
+                  .finally(() => {
+                    pending--;
+                    if (pending === 0) {
+                      imap.end();
+                      resolve(emails);
+                    }
+                  });
               });
-            });
-
-           
-            fetcher.once("end", () => {
-              imap.end();
-              resolve(emails);
             });
           });
         });
       });
-
-      imap.once("error", (err:Error) => {
-        reject(err);
-      });
-
+  
+      imap.once("error", (err:any) => reject(err));
+  
       imap.connect();
     });
   }
+  
 }
