@@ -17,13 +17,16 @@ export class RfpService {
 
   async getRfps(query: any) {
     const { limit = 10, page = 1, search } = query;
+    // console.log(search)
 
     const skip = (page - 1) * limit;
 
     let matchObj: Record<string, any> = {};
 
+ 
+    
     if (search) {
-      matchObj.name = { $regex: search, $options: "i" };
+      matchObj.title = { $regex: search, $options: "i" };
     }
 
     const pipeline: PipelineStage[] = [
@@ -53,12 +56,16 @@ export class RfpService {
     try {
       const result = await RFP.aggregate(pipeline).exec();
 
+
+      // console.log(result[0])
       return {
         data: result[0]?.data,
         total: result[0]?.total || 0,
         page,
         limit,
       };
+
+
     } catch (err) {
       console.log(err);
       const error = createHttpError(500, "Error while ftching data");
